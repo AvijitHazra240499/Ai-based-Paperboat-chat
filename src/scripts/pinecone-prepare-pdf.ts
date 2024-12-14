@@ -11,7 +11,7 @@ export const preparedoc =async () => {
     const pineconeClient = await getPineconeClient();
     console.log("Preparing chunks from PDF file");
     const docs = await getChunkedDocsFromPDF();
-    fs.writeFileSync("docs.json",JSON.stringify(docs,null,2))
+    fs.writeFileSync("tmp/docs.json",JSON.stringify(docs,null,2))
     console.log(`Loading ${docs.length} chunks into pinecone...`);
     await embedAndStoreDocs(pineconeClient, docs);
     console.log("Data embedded and stored in pine-cone index");
