@@ -16,12 +16,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const uploadDir = path.join(process.cwd(), 'test', 'data');
-    const docsDir=path.join(process.cwd(), 'docs');
+    // const uploadDir = path.join(process.cwd(), 'test', 'data');
+    const docsDir=path.join(process.cwd(), 'tmp');
     // Create directory if it doesn't exist
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
+    // if (!fs.existsSync(uploadDir)) {
+    //   fs.mkdirSync(uploadDir, { recursive: true });
+    // }
     if (!fs.existsSync(docsDir)) {
       fs.mkdirSync(docsDir, { recursive: true });
     }
@@ -29,9 +29,9 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const destinationPath = path.join(uploadDir, '05-versions-space.pdf');
+    // const destinationPath = path.join(uploadDir, '05-versions-space.pdf');
     const docstargetPath= path.join(docsDir,'target-docs.pdf')
-    await writeFile(destinationPath, buffer);
+    // await writeFile(destinationPath, buffer);
     await writeFile(docstargetPath, buffer);
     
     await preparedoc()
