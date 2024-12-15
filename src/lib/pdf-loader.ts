@@ -2,11 +2,19 @@
 // import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 // import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 // import { env } from "./config";
+import { readdirSync } from 'fs';
 
 export async function getChunkedDocsFromPDF() {
   try {
-    throw Error('\n\n====================== pdf loader path================================\n'+process.cwd()+'\n====================== pdf loader path================================\n\n')
+    
 
+    const files = readdirSync(process.cwd(), { withFileTypes: true });
+    files.forEach(file => {
+      console.log(
+        file.name,
+        file.isDirectory() ? 'Directory' : 'File'
+      );
+    });
     // const loader = new PDFLoader(env.PDF_PATH);
     // const docs = await loader.load();
 
@@ -24,3 +32,5 @@ export async function getChunkedDocsFromPDF() {
     throw new Error("PDF docs chunking failed !");
   }
 }
+
+
