@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     // await writeFile(destinationPath, buffer);
     await writeFile(docstargetPath, buffer);
     
-    // await preparedoc()
+    await preparedoc()
 
 
 
