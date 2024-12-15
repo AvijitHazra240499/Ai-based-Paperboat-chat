@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-"build": "mkdir test\\data 2>nul && if not exist test\\data\\05-versions-space.pdf ( type nul > test\\data\\05-versions-space.pdf ) && next build",
+    "setup": "node src/scripts/setup.js",
+    "build": "npm run setup && next build",   
     "start": "next start",
     "lint": "next lint",
     "prepare:data": "tsx -r dotenv/config ./src/scripts/pinecone-prepare-docs.ts"
