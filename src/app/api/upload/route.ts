@@ -17,7 +17,8 @@ export async function POST(req: NextRequest) {
     }
 
     // const uploadDir = path.join(process.cwd(), 'test', 'data');
-    const docsDir=path.join(process.cwd(), 'tmp');
+    const docsDir = '/tmp';
+    // const docsDir=path.join(process.cwd(), 'tmp');
     // Create directory if it doesn't exist
     // if (!fs.existsSync(uploadDir)) {
     //   fs.mkdirSync(uploadDir, { recursive: true });
