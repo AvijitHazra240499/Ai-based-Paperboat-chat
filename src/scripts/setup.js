@@ -1,14 +1,14 @@
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname, join, resolve } from 'path';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 
 // Define __dirname for ES Module
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = dirname(__filename);
 
-// Target directory and file
-const dir = join(__dirname, '../../test/data');
-const file = join(dir, '05-versions-space.pdf');
+// Ensure the file is created in the project root, not relative paths
+const dir = join(process.cwd(), 'test/data');
+const file = resolve(dir, '05-versions-space.pdf');
 
 // Create directory if it doesn't exist
 if (!existsSync(dir)) {
