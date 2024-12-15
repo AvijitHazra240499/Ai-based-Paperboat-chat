@@ -5,10 +5,7 @@ import { env } from "./config";
 
 export async function getChunkedDocsFromPDF() {
   try {
-    console.log('\n\n====================== pdf loader path================================')
-    console.log(process.cwd())
-
-    console.log('====================== pdf loader path================================\n\n')
+    throw Error('\n\n====================== pdf loader path================================\n'+process.cwd()+'\n====================== pdf loader path================================\n\n')
 
     const loader = new PDFLoader(env.PDF_PATH);
     const docs = await loader.load();
