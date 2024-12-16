@@ -7,7 +7,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'fs';
 // const __dirname = dirname(__filename);
 
 // Ensure the file is created in the project root, not relative paths
-const dir = join(process.cwd(), 'test/data');
+const dir = join(process.cwd(), '../test/data');
 const file = resolve(dir, '05-versions-space.pdf');
 
 // Create directory if it doesn't exist
