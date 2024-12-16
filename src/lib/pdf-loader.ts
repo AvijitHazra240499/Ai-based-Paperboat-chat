@@ -2,37 +2,48 @@ import "pdf-parse"; // Peer dep
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { env } from "./config";
-import { readdirSync } from 'fs';
-
+import fs from "fs"
+import pdfParser from 'pdf-parse';
 export async function getChunkedDocsFromPDF() {
   try {
     
-    console.log(
-      '\n\n====================== pdf loader path================================\n'
-        );
-    const files = readdirSync(process.cwd(), { withFileTypes: true });
-    files.forEach(file => {
-      console.log(
-        file.name,
-        file.isDirectory() ? 'Directory' : 'File'
-      );
+  
+     
+    let dataBuffer = fs.readFileSync(env.PDF_PATH);
+     
+    let data=await pdfParser(dataBuffer) 
+    let docs: { pageContent: string; metadata: { source: string; pdf: { version: pdfParser.Version; }; }; }[]=[]
+     data.text.split("\n\n").forEach(element => {
+      if(element.length==0){
+        return null
+      }
+      let page={
+        pageContent:element,
+        metadata:{
+          source:env.PDF_PATH,
+          pdf:{
+            version:data.version
+          }
+        }
+      }
+      docs.push(page)
+
+     });
+      
+
+    
+    // const loader = new PDFLoader(env.PDF_PATH);
+    // const docs = await loader.load();
+    // fs.writeFileSync('data2.json',JSON.stringify(docs))
+    // From the docs https://www.pinecone.io/learn/chunking-strategies/
+    const textSplitter = new RecursiveCharacterTextSplitter({
+      chunkSize: 1000,
+      chunkOverlap: 200,
     });
 
-    console.log(
-      '\n====================== pdf loader path================================\n\n'
-        );
-    const loader = new PDFLoader(env.PDF_PATH);
-    const docs = await loader.load();
+    const chunkedDocs = await textSplitter.splitDocuments(docs);
 
-    // // From the docs https://www.pinecone.io/learn/chunking-strategies/
-    // const textSplitter = new RecursiveCharacterTextSplitter({
-    //   chunkSize: 1000,
-    //   chunkOverlap: 200,
-    // });
-
-    // const chunkedDocs = await textSplitter.splitDocuments(docs);
-
-    // return chunkedDocs;
+   return chunkedDocs;
   } catch (e) {
     console.error(e);
     throw new Error("PDF docs chunking failed !");
