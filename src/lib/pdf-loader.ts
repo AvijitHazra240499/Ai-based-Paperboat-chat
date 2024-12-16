@@ -7,7 +7,9 @@ import { readdirSync } from 'fs';
 export async function getChunkedDocsFromPDF() {
   try {
     
-
+    console.log(
+      '\n\n====================== pdf loader path================================\n'
+        );
     const files = readdirSync(process.cwd(), { withFileTypes: true });
     files.forEach(file => {
       console.log(
@@ -15,6 +17,10 @@ export async function getChunkedDocsFromPDF() {
         file.isDirectory() ? 'Directory' : 'File'
       );
     });
+
+    console.log(
+      '\n====================== pdf loader path================================\n\n'
+        );
     // const loader = new PDFLoader(env.PDF_PATH);
     // const docs = await loader.load();
 
