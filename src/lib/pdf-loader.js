@@ -1,18 +1,19 @@
-import "pdf-parse"; // Peer dep
+// import "pdf-parse"; // Peer dep
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { env } from "./config";
 import fs from "fs"
-import pdfParser from 'pdf-parse';
+import pdfParser from 'pdf-parser-fix';
+
+// import * as pdfParser from "pdf-parse/lib/pdf-parse.js"
 export async function getChunkedDocsFromPDF() {
   try {
     
-  
      
     let dataBuffer = fs.readFileSync(env.PDF_PATH);
      
-    let data=await pdfParser(dataBuffer) 
-    let docs: { pageContent: string; metadata: { source: string; pdf: { version: pdfParser.Version; }; }; }[]=[]
+    let data = await pdfParser(dataBuffer);
+    let docs=[]
      data.text.split("\n\n").forEach(element => {
       if(element.length==0){
         return null
