@@ -24,12 +24,13 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const streamingTextResponse = callChain({
+    const response = await callChain({
       question,
       chatHistory: formattedPreviousMessages.join("\n"),
     });
 
-    return streamingTextResponse;
+    // Send a custom JSON response with additional data
+    return NextResponse.json(response)
   } catch (error) {
     console.error("Internal server error ", error);
     return NextResponse.json("Error: Something went wrong. Try again!", {

@@ -6,14 +6,50 @@ import { useChat, Message } from "ai-stream-experimental/react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Spinner } from "./ui/spinner";
-import { useEffect, useRef } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
+import { nanoid } from "ai";
 
 export function Chat() {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const { messages, input, handleInputChange, handleSubmit, isLoading, data } =
-    useChat({
-      initialMessages,
+  const [input,setInput] = useState('')
+  const [messages,setMessages] = useState(initialMessages)
+  const [data, setData] = useState<{sources: string[]}[]>([])
+  const [isLoading, setLoading] = useState(false)
+  const handleInputChange = (e: any) =>{
+    setInput(e.target.value)
+  }
+    
+  const handleSubmit =async (e: FormEvent)=>{
+    e.preventDefault()
+    let msgs:Message[] = [...messages,{
+      id:nanoid(5),
+      content: input,
+      role: 'user'
+    }];
+    setMessages(msgs)
+    setInput('')
+    setLoading(true)
+    
+    const apiRes = await fetch('/api/chat',{
+      method:"POST",
+      body: JSON.stringify({
+        messages: msgs.map(({role,content})=>({role,content}))
+      })
     });
+   
+    const jsonRes = await apiRes.json()
+    msgs = [...msgs,{
+      id: nanoid(5),
+      role:'assistant',
+      content:jsonRes.answer
+    }]
+    console.log(jsonRes)
+    const curr = {sources: jsonRes.context.map((d:any)=>d.pageContent)}
+    setMessages(msgs)
+    setData((prev)=> [...prev,curr])
+    setLoading(false)
+
+  }
 
   useEffect(() => {
     setTimeout(() => scrollToBottom(containerRef), 100);

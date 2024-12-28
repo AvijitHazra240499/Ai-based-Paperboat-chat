@@ -1,13 +1,16 @@
-import { ConversationalRetrievalQAChain } from "langchain/chains";
 import { getVectorStore } from "./vector-store";
 import { getPineconeClient } from "./pinecone-client";
-import {
-  StreamingTextResponse,
-  experimental_StreamData,
-  LangChainStream,
-} from "ai-stream-experimental";
 import { streamingModel, nonStreamingModel } from "./llm";
 import { STANDALONE_QUESTION_TEMPLATE, QA_TEMPLATE } from "./prompt-templates";
+
+/*------------------new lanchain cain version--------------------------*/
+
+import { createRetrievalChain } from "langchain/chains/retrieval";
+import { createHistoryAwareRetriever } from "langchain/chains/history_aware_retriever";
+import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
+import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
+
+/*------------------new lanchain cain version--------------------------*/
 
 type callChainArgs = {
   question: string;
@@ -20,49 +23,43 @@ export async function callChain({ question, chatHistory }: callChainArgs) {
     const sanitizedQuestion = question.trim().replaceAll("\n", " ");
     const pineconeClient = await getPineconeClient();
     const vectorStore = await getVectorStore(pineconeClient);
-    const { stream, handlers } = LangChainStream({
-      experimental_streamData: true,
+
+ /*------------------Start:: new langchain cain version--------------------------*/
+    let contextualizeQPrompt = ChatPromptTemplate.fromMessages([
+      ["system", STANDALONE_QUESTION_TEMPLATE],
+      new MessagesPlaceholder("chat_history"),
+      ["human", "{input}"],
+    ])
+
+    let historyAwareRetriever = await createHistoryAwareRetriever({
+      llm: streamingModel,
+      retriever: vectorStore.asRetriever(),
+      rephrasePrompt: contextualizeQPrompt,
+    })
+    const qaPrompt = ChatPromptTemplate.fromMessages([
+      ["system", QA_TEMPLATE],
+      new MessagesPlaceholder("chat_history"),
+      ["human", "{input}"],
+    ]);
+
+    let questionAnswerChain = await createStuffDocumentsChain({
+      llm:nonStreamingModel,
+      prompt: qaPrompt,
     });
-    const data = new experimental_StreamData();
 
-    const chain = ConversationalRetrievalQAChain.fromLLM(
-      streamingModel,
-      vectorStore.asRetriever(),
-      {
-        qaTemplate: QA_TEMPLATE,
-        questionGeneratorTemplate: STANDALONE_QUESTION_TEMPLATE,
-        returnSourceDocuments: true, //default 4
-        questionGeneratorChainOptions: {
-          llm: nonStreamingModel,
-        },
-      }
-    );
+    const ragChain = await createRetrievalChain({
+      retriever:historyAwareRetriever,
+      combineDocsChain:questionAnswerChain
+    })
 
-    // Question using chat-history
-    // Reference https://js.langchain.com/docs/modules/chains/popular/chat_vector_db#externally-managed-memory
-    chain
-      .call(
-        {
-          question: sanitizedQuestion,
-          chat_history: chatHistory,
-        },
-        [handlers]
-      )
-      .then(async (res) => {
-        const sourceDocuments = res?.sourceDocuments;
-        const firstTwoDocuments = sourceDocuments.slice(0, 2);
-        const pageContents = firstTwoDocuments.map(
-          ({ pageContent }: { pageContent: string }) => pageContent
-        );
-        console.log("already appended ", data);
-        data.append({
-          sources: pageContents,
-        });
-        data.close();
-      });
+    const response = await ragChain.invoke({
+      chat_history:chatHistory,
+      input: sanitizedQuestion,
+      question:sanitizedQuestion
+    });
+ /*------------------End:: new langchain cain version--------------------------*/
 
-    // Return the readable stream
-    return new StreamingTextResponse(stream, {}, data);
+    return response
   } catch (e) {
     console.error(e);
     throw new Error("Call chain method failed to execute successfully!!");
