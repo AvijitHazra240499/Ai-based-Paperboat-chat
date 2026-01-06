@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Use project's tmp directory (matches PDF_PATH in .env.local)
-    const docsDir = path.join(process.cwd(), 'tmp');
+    const docsDir = '/tmp';
     
     // Create directory if it doesn't exist
     if (!fs.existsSync(docsDir)) {
