@@ -31,7 +31,7 @@ export async function callChain({ question, chatHistory }: callChainArgs) {
       ["human", "{input}"],
     ])
 
-    let historyAwareRetriever = await createHistoryAwareRetriever({
+    let historyAwareRetriever = await createHistoryAwareRetriever({ 
       llm: streamingModel,
       retriever: vectorStore.asRetriever(),
       rephrasePrompt: contextualizeQPrompt,

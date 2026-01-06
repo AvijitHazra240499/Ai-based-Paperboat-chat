@@ -14,7 +14,7 @@ async function createIndex(client: Pinecone, indexName: string) {
         cloud:"aws"
       }},
       name: indexName,
-      dimension: 1536,  // Dimension size for your embeddings
+      dimension: 1024,  // Dimension for Voyage-2 embeddings
       metric: 'cosine'  // Distance metric for similarity search
     });    console.log(
       `Waiting for ${env.INDEX_INIT_TIMEOUT} seconds for index initialization to complete...`

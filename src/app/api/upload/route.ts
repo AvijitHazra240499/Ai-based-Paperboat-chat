@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from 'fs';
 import path from 'path';
-import { writeFile } from 'fs/promises';
 import { preparedoc } from "@/scripts/pinecone-prepare-pdf";
 
 export async function POST(req: NextRequest) {
@@ -16,28 +15,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // const uploadDir = path.join(process.cwd(), 'test', 'data');
-    const docsDir = '/tmp';
-    // const docsDir=path.join(process.cwd(), 'tmp');
+    // Use project's tmp directory (matches PDF_PATH in .env.local)
+    const docsDir = path.join(process.cwd(), 'tmp');
+    
     // Create directory if it doesn't exist
-    // if (!fs.existsSync(uploadDir)) {
-    //   fs.mkdirSync(uploadDir, { recursive: true });
-    // }
     if (!fs.existsSync(docsDir)) {
       fs.mkdirSync(docsDir, { recursive: true });
     }
 
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const uint8Array = new Uint8Array(bytes);
 
-    // const destinationPath = path.join(uploadDir, '05-versions-space.pdf');
-    const docstargetPath= path.join(docsDir,'target-docs.pdf')
-    // await writeFile(destinationPath, buffer);
-    await writeFile(docstargetPath, buffer);
+    const docstargetPath = path.join(docsDir, 'target-docs.pdf');
     
-    await preparedoc()
-
-
+    // Write file synchronously to ensure it exists before preparedoc runs
+    fs.writeFileSync(docstargetPath, uint8Array);
+    
+    // Verify file was written
+    if (!fs.existsSync(docstargetPath)) {
+      throw new Error('Failed to write PDF file');
+    }
+    
+    console.log('PDF saved to:', docstargetPath);
+    
+    await preparedoc();
 
     return NextResponse.json(
       { message: 'File uploaded successfully & deployed' },
@@ -51,9 +52,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
-// export const config = {
-//   api: {
-//     bodyParser: false,
-//   },
-// };
